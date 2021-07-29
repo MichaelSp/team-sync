@@ -141,7 +141,7 @@ jobs:
   synchronize-teams:
     runs-on: ubuntu-latest
     steps:
-    - uses: rmacklin/team-sync@v0
+    - uses: rmacklin/team-sync@v0.5.0
       with:
         token: "${{ secrets.ORG_ADMIN_ACCESS_TOKEN }}"
         team-data-path: 'teams.yml'
