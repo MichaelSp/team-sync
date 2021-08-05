@@ -1,6 +1,6 @@
 import {RestEndpointMethods} from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types'
 import {TeamData} from './team-data'
-import github from '@actions/github'
+import {context} from '@actions/github'
 import yaml from 'js-yaml'
 
 export async function getTeamData(
@@ -18,10 +18,10 @@ export async function getTeamData(
 
 async function fetchContent(client: RestEndpointMethods, repoPath: string): Promise<string> {
   const response = await client.repos.getContent({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
+    owner: context.repo.owner,
+    repo: context.repo.repo,
     path: repoPath,
-    ref: github.context.sha
+    ref: context.sha
   })
 
   if (Array.isArray(response.data)) {

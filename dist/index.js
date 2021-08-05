@@ -11,7 +11,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getTeamData = void 0;
-const github_1 = __importDefault(__nccwpck_require__(5438));
+const github_1 = __nccwpck_require__(5438);
 const js_yaml_1 = __importDefault(__nccwpck_require__(1917));
 async function getTeamData(client, teamDataPath) {
     const teamDataContent = await fetchContent(client, teamDataPath);
@@ -25,10 +25,10 @@ async function getTeamData(client, teamDataPath) {
 exports.getTeamData = getTeamData;
 async function fetchContent(client, repoPath) {
     const response = await client.repos.getContent({
-        owner: github_1.default.context.repo.owner,
-        repo: github_1.default.context.repo.repo,
+        owner: github_1.context.repo.owner,
+        repo: github_1.context.repo.repo,
         path: repoPath,
-        ref: github_1.default.context.sha
+        ref: github_1.context.sha
     });
     if (Array.isArray(response.data)) {
         throw new Error('path must point to a single file, not a directory');
@@ -67,12 +67,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
-const github_1 = __importDefault(__nccwpck_require__(5438));
+const github_1 = __nccwpck_require__(5438);
 const get_team_data_1 = __nccwpck_require__(882);
 const sync_1 = __nccwpck_require__(5056);
 async function run() {
@@ -80,8 +77,8 @@ async function run() {
         const token = core.getInput('token');
         const teamDataPath = core.getInput('team-data-path');
         const teamNamePrefix = core.getInput('prefix-teams-with');
-        const client = github_1.default.getOctokit(token).rest;
-        const org = github_1.default.context.repo.owner;
+        const client = github_1.getOctokit(token).rest;
+        const org = github_1.context.repo.owner;
         core.debug('Fetching authenticated user');
         const authenticatedUserResponse = await client.users.getAuthenticated();
         const authenticatedUser = authenticatedUserResponse.data.login;
@@ -130,7 +127,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.synchronizeTeamData = void 0;
-const slugify_1 = __importDefault(__nccwpck_require__(5268));
+const slugify_1 = __importDefault(__nccwpck_require__(6507));
 const core = __importStar(__nccwpck_require__(2186));
 async function synchronizeTeamData(client, org, authenticatedUser, teams, teamNamePrefix) {
     for (const unprefixedTeamName of Object.keys(teams)) {
@@ -142,7 +139,9 @@ async function synchronizeTeamData(client, org, authenticatedUser, teams, teamNa
             continue;
         }
         const description = teamData.description || '';
-        const desiredMembers = (teamData.members || []).map((m) => m.github);
+        const desiredMembers = (teamData.members || [])
+            .map((m) => m.github)
+            .filter(x => x !== undefined);
         core.debug(`Desired team members for team slug ${teamSlug}:`);
         core.debug(JSON.stringify(desiredMembers));
         const { existingTeam, existingMembers } = await getExistingTeamAndMembers(client, org, teamSlug);
@@ -1762,7 +1761,7 @@ exports.Octokit = Octokit;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var isPlainObject = __nccwpck_require__(558);
+var isPlainObject = __nccwpck_require__(3287);
 var universalUserAgent = __nccwpck_require__(5030);
 
 function lowercaseKeys(object) {
@@ -2152,52 +2151,6 @@ exports.endpoint = endpoint;
 
 /***/ }),
 
-/***/ 558:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-exports.isPlainObject = isPlainObject;
-
-
-/***/ }),
-
 /***/ 8467:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -2330,7 +2283,7 @@ exports.withCustomRequest = withCustomRequest;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-const VERSION = "2.14.0";
+const VERSION = "2.15.0";
 
 function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
@@ -2514,7 +2467,7 @@ const composePaginateRest = Object.assign(paginate, {
   iterator
 });
 
-const paginatingEndpoints = ["GET /app/hook/deliveries", "GET /app/installations", "GET /applications/grants", "GET /authorizations", "GET /enterprises/{enterprise}/actions/permissions/organizations", "GET /enterprises/{enterprise}/actions/runner-groups", "GET /enterprises/{enterprise}/actions/runner-groups/{runner_group_id}/organizations", "GET /enterprises/{enterprise}/actions/runner-groups/{runner_group_id}/runners", "GET /enterprises/{enterprise}/actions/runners", "GET /enterprises/{enterprise}/actions/runners/downloads", "GET /events", "GET /gists", "GET /gists/public", "GET /gists/starred", "GET /gists/{gist_id}/comments", "GET /gists/{gist_id}/commits", "GET /gists/{gist_id}/forks", "GET /installation/repositories", "GET /issues", "GET /marketplace_listing/plans", "GET /marketplace_listing/plans/{plan_id}/accounts", "GET /marketplace_listing/stubbed/plans", "GET /marketplace_listing/stubbed/plans/{plan_id}/accounts", "GET /networks/{owner}/{repo}/events", "GET /notifications", "GET /organizations", "GET /orgs/{org}/actions/permissions/repositories", "GET /orgs/{org}/actions/runner-groups", "GET /orgs/{org}/actions/runner-groups/{runner_group_id}/repositories", "GET /orgs/{org}/actions/runner-groups/{runner_group_id}/runners", "GET /orgs/{org}/actions/runners", "GET /orgs/{org}/actions/runners/downloads", "GET /orgs/{org}/actions/secrets", "GET /orgs/{org}/actions/secrets/{secret_name}/repositories", "GET /orgs/{org}/blocks", "GET /orgs/{org}/credential-authorizations", "GET /orgs/{org}/events", "GET /orgs/{org}/failed_invitations", "GET /orgs/{org}/hooks", "GET /orgs/{org}/hooks/{hook_id}/deliveries", "GET /orgs/{org}/installations", "GET /orgs/{org}/invitations", "GET /orgs/{org}/invitations/{invitation_id}/teams", "GET /orgs/{org}/issues", "GET /orgs/{org}/members", "GET /orgs/{org}/migrations", "GET /orgs/{org}/migrations/{migration_id}/repositories", "GET /orgs/{org}/outside_collaborators", "GET /orgs/{org}/projects", "GET /orgs/{org}/public_members", "GET /orgs/{org}/repos", "GET /orgs/{org}/team-sync/groups", "GET /orgs/{org}/teams", "GET /orgs/{org}/teams/{team_slug}/discussions", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions", "GET /orgs/{org}/teams/{team_slug}/invitations", "GET /orgs/{org}/teams/{team_slug}/members", "GET /orgs/{org}/teams/{team_slug}/projects", "GET /orgs/{org}/teams/{team_slug}/repos", "GET /orgs/{org}/teams/{team_slug}/team-sync/group-mappings", "GET /orgs/{org}/teams/{team_slug}/teams", "GET /projects/columns/{column_id}/cards", "GET /projects/{project_id}/collaborators", "GET /projects/{project_id}/columns", "GET /repos/{owner}/{repo}/actions/artifacts", "GET /repos/{owner}/{repo}/actions/runners", "GET /repos/{owner}/{repo}/actions/runners/downloads", "GET /repos/{owner}/{repo}/actions/runs", "GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts", "GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs", "GET /repos/{owner}/{repo}/actions/secrets", "GET /repos/{owner}/{repo}/actions/workflows", "GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs", "GET /repos/{owner}/{repo}/assignees", "GET /repos/{owner}/{repo}/branches", "GET /repos/{owner}/{repo}/check-runs/{check_run_id}/annotations", "GET /repos/{owner}/{repo}/check-suites/{check_suite_id}/check-runs", "GET /repos/{owner}/{repo}/code-scanning/alerts", "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances", "GET /repos/{owner}/{repo}/code-scanning/analyses", "GET /repos/{owner}/{repo}/collaborators", "GET /repos/{owner}/{repo}/comments", "GET /repos/{owner}/{repo}/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/commits", "GET /repos/{owner}/{repo}/commits/{commit_sha}/branches-where-head", "GET /repos/{owner}/{repo}/commits/{commit_sha}/comments", "GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls", "GET /repos/{owner}/{repo}/commits/{ref}/check-runs", "GET /repos/{owner}/{repo}/commits/{ref}/check-suites", "GET /repos/{owner}/{repo}/commits/{ref}/statuses", "GET /repos/{owner}/{repo}/contributors", "GET /repos/{owner}/{repo}/deployments", "GET /repos/{owner}/{repo}/deployments/{deployment_id}/statuses", "GET /repos/{owner}/{repo}/events", "GET /repos/{owner}/{repo}/forks", "GET /repos/{owner}/{repo}/git/matching-refs/{ref}", "GET /repos/{owner}/{repo}/hooks", "GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries", "GET /repos/{owner}/{repo}/invitations", "GET /repos/{owner}/{repo}/issues", "GET /repos/{owner}/{repo}/issues/comments", "GET /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/issues/events", "GET /repos/{owner}/{repo}/issues/{issue_number}/comments", "GET /repos/{owner}/{repo}/issues/{issue_number}/events", "GET /repos/{owner}/{repo}/issues/{issue_number}/labels", "GET /repos/{owner}/{repo}/issues/{issue_number}/reactions", "GET /repos/{owner}/{repo}/issues/{issue_number}/timeline", "GET /repos/{owner}/{repo}/keys", "GET /repos/{owner}/{repo}/labels", "GET /repos/{owner}/{repo}/milestones", "GET /repos/{owner}/{repo}/milestones/{milestone_number}/labels", "GET /repos/{owner}/{repo}/notifications", "GET /repos/{owner}/{repo}/pages/builds", "GET /repos/{owner}/{repo}/projects", "GET /repos/{owner}/{repo}/pulls", "GET /repos/{owner}/{repo}/pulls/comments", "GET /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/pulls/{pull_number}/comments", "GET /repos/{owner}/{repo}/pulls/{pull_number}/commits", "GET /repos/{owner}/{repo}/pulls/{pull_number}/files", "GET /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers", "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews", "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments", "GET /repos/{owner}/{repo}/releases", "GET /repos/{owner}/{repo}/releases/{release_id}/assets", "GET /repos/{owner}/{repo}/secret-scanning/alerts", "GET /repos/{owner}/{repo}/stargazers", "GET /repos/{owner}/{repo}/subscribers", "GET /repos/{owner}/{repo}/tags", "GET /repos/{owner}/{repo}/teams", "GET /repositories", "GET /repositories/{repository_id}/environments/{environment_name}/secrets", "GET /scim/v2/enterprises/{enterprise}/Groups", "GET /scim/v2/enterprises/{enterprise}/Users", "GET /scim/v2/organizations/{org}/Users", "GET /search/code", "GET /search/commits", "GET /search/issues", "GET /search/labels", "GET /search/repositories", "GET /search/topics", "GET /search/users", "GET /teams/{team_id}/discussions", "GET /teams/{team_id}/discussions/{discussion_number}/comments", "GET /teams/{team_id}/discussions/{discussion_number}/comments/{comment_number}/reactions", "GET /teams/{team_id}/discussions/{discussion_number}/reactions", "GET /teams/{team_id}/invitations", "GET /teams/{team_id}/members", "GET /teams/{team_id}/projects", "GET /teams/{team_id}/repos", "GET /teams/{team_id}/team-sync/group-mappings", "GET /teams/{team_id}/teams", "GET /user/blocks", "GET /user/emails", "GET /user/followers", "GET /user/following", "GET /user/gpg_keys", "GET /user/installations", "GET /user/installations/{installation_id}/repositories", "GET /user/issues", "GET /user/keys", "GET /user/marketplace_purchases", "GET /user/marketplace_purchases/stubbed", "GET /user/memberships/orgs", "GET /user/migrations", "GET /user/migrations/{migration_id}/repositories", "GET /user/orgs", "GET /user/public_emails", "GET /user/repos", "GET /user/repository_invitations", "GET /user/starred", "GET /user/subscriptions", "GET /user/teams", "GET /users", "GET /users/{username}/events", "GET /users/{username}/events/orgs/{org}", "GET /users/{username}/events/public", "GET /users/{username}/followers", "GET /users/{username}/following", "GET /users/{username}/gists", "GET /users/{username}/gpg_keys", "GET /users/{username}/keys", "GET /users/{username}/orgs", "GET /users/{username}/projects", "GET /users/{username}/received_events", "GET /users/{username}/received_events/public", "GET /users/{username}/repos", "GET /users/{username}/starred", "GET /users/{username}/subscriptions"];
+const paginatingEndpoints = ["GET /app/hook/deliveries", "GET /app/installations", "GET /applications/grants", "GET /authorizations", "GET /enterprises/{enterprise}/actions/permissions/organizations", "GET /enterprises/{enterprise}/actions/runner-groups", "GET /enterprises/{enterprise}/actions/runner-groups/{runner_group_id}/organizations", "GET /enterprises/{enterprise}/actions/runner-groups/{runner_group_id}/runners", "GET /enterprises/{enterprise}/actions/runners", "GET /enterprises/{enterprise}/actions/runners/downloads", "GET /events", "GET /gists", "GET /gists/public", "GET /gists/starred", "GET /gists/{gist_id}/comments", "GET /gists/{gist_id}/commits", "GET /gists/{gist_id}/forks", "GET /installation/repositories", "GET /issues", "GET /marketplace_listing/plans", "GET /marketplace_listing/plans/{plan_id}/accounts", "GET /marketplace_listing/stubbed/plans", "GET /marketplace_listing/stubbed/plans/{plan_id}/accounts", "GET /networks/{owner}/{repo}/events", "GET /notifications", "GET /organizations", "GET /orgs/{org}/actions/permissions/repositories", "GET /orgs/{org}/actions/runner-groups", "GET /orgs/{org}/actions/runner-groups/{runner_group_id}/repositories", "GET /orgs/{org}/actions/runner-groups/{runner_group_id}/runners", "GET /orgs/{org}/actions/runners", "GET /orgs/{org}/actions/runners/downloads", "GET /orgs/{org}/actions/secrets", "GET /orgs/{org}/actions/secrets/{secret_name}/repositories", "GET /orgs/{org}/blocks", "GET /orgs/{org}/credential-authorizations", "GET /orgs/{org}/events", "GET /orgs/{org}/failed_invitations", "GET /orgs/{org}/hooks", "GET /orgs/{org}/hooks/{hook_id}/deliveries", "GET /orgs/{org}/installations", "GET /orgs/{org}/invitations", "GET /orgs/{org}/invitations/{invitation_id}/teams", "GET /orgs/{org}/issues", "GET /orgs/{org}/members", "GET /orgs/{org}/migrations", "GET /orgs/{org}/migrations/{migration_id}/repositories", "GET /orgs/{org}/outside_collaborators", "GET /orgs/{org}/projects", "GET /orgs/{org}/public_members", "GET /orgs/{org}/repos", "GET /orgs/{org}/team-sync/groups", "GET /orgs/{org}/teams", "GET /orgs/{org}/teams/{team_slug}/discussions", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions", "GET /orgs/{org}/teams/{team_slug}/invitations", "GET /orgs/{org}/teams/{team_slug}/members", "GET /orgs/{org}/teams/{team_slug}/projects", "GET /orgs/{org}/teams/{team_slug}/repos", "GET /orgs/{org}/teams/{team_slug}/team-sync/group-mappings", "GET /orgs/{org}/teams/{team_slug}/teams", "GET /projects/columns/{column_id}/cards", "GET /projects/{project_id}/collaborators", "GET /projects/{project_id}/columns", "GET /repos/{owner}/{repo}/actions/artifacts", "GET /repos/{owner}/{repo}/actions/runners", "GET /repos/{owner}/{repo}/actions/runners/downloads", "GET /repos/{owner}/{repo}/actions/runs", "GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts", "GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs", "GET /repos/{owner}/{repo}/actions/secrets", "GET /repos/{owner}/{repo}/actions/workflows", "GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs", "GET /repos/{owner}/{repo}/assignees", "GET /repos/{owner}/{repo}/autolinks", "GET /repos/{owner}/{repo}/branches", "GET /repos/{owner}/{repo}/check-runs/{check_run_id}/annotations", "GET /repos/{owner}/{repo}/check-suites/{check_suite_id}/check-runs", "GET /repos/{owner}/{repo}/code-scanning/alerts", "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances", "GET /repos/{owner}/{repo}/code-scanning/analyses", "GET /repos/{owner}/{repo}/collaborators", "GET /repos/{owner}/{repo}/comments", "GET /repos/{owner}/{repo}/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/commits", "GET /repos/{owner}/{repo}/commits/{commit_sha}/branches-where-head", "GET /repos/{owner}/{repo}/commits/{commit_sha}/comments", "GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls", "GET /repos/{owner}/{repo}/commits/{ref}/check-runs", "GET /repos/{owner}/{repo}/commits/{ref}/check-suites", "GET /repos/{owner}/{repo}/commits/{ref}/statuses", "GET /repos/{owner}/{repo}/contributors", "GET /repos/{owner}/{repo}/deployments", "GET /repos/{owner}/{repo}/deployments/{deployment_id}/statuses", "GET /repos/{owner}/{repo}/events", "GET /repos/{owner}/{repo}/forks", "GET /repos/{owner}/{repo}/git/matching-refs/{ref}", "GET /repos/{owner}/{repo}/hooks", "GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries", "GET /repos/{owner}/{repo}/invitations", "GET /repos/{owner}/{repo}/issues", "GET /repos/{owner}/{repo}/issues/comments", "GET /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/issues/events", "GET /repos/{owner}/{repo}/issues/{issue_number}/comments", "GET /repos/{owner}/{repo}/issues/{issue_number}/events", "GET /repos/{owner}/{repo}/issues/{issue_number}/labels", "GET /repos/{owner}/{repo}/issues/{issue_number}/reactions", "GET /repos/{owner}/{repo}/issues/{issue_number}/timeline", "GET /repos/{owner}/{repo}/keys", "GET /repos/{owner}/{repo}/labels", "GET /repos/{owner}/{repo}/milestones", "GET /repos/{owner}/{repo}/milestones/{milestone_number}/labels", "GET /repos/{owner}/{repo}/notifications", "GET /repos/{owner}/{repo}/pages/builds", "GET /repos/{owner}/{repo}/projects", "GET /repos/{owner}/{repo}/pulls", "GET /repos/{owner}/{repo}/pulls/comments", "GET /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/pulls/{pull_number}/comments", "GET /repos/{owner}/{repo}/pulls/{pull_number}/commits", "GET /repos/{owner}/{repo}/pulls/{pull_number}/files", "GET /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers", "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews", "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments", "GET /repos/{owner}/{repo}/releases", "GET /repos/{owner}/{repo}/releases/{release_id}/assets", "GET /repos/{owner}/{repo}/secret-scanning/alerts", "GET /repos/{owner}/{repo}/stargazers", "GET /repos/{owner}/{repo}/subscribers", "GET /repos/{owner}/{repo}/tags", "GET /repos/{owner}/{repo}/teams", "GET /repositories", "GET /repositories/{repository_id}/environments/{environment_name}/secrets", "GET /scim/v2/enterprises/{enterprise}/Groups", "GET /scim/v2/enterprises/{enterprise}/Users", "GET /scim/v2/organizations/{org}/Users", "GET /search/code", "GET /search/commits", "GET /search/issues", "GET /search/labels", "GET /search/repositories", "GET /search/topics", "GET /search/users", "GET /teams/{team_id}/discussions", "GET /teams/{team_id}/discussions/{discussion_number}/comments", "GET /teams/{team_id}/discussions/{discussion_number}/comments/{comment_number}/reactions", "GET /teams/{team_id}/discussions/{discussion_number}/reactions", "GET /teams/{team_id}/invitations", "GET /teams/{team_id}/members", "GET /teams/{team_id}/projects", "GET /teams/{team_id}/repos", "GET /teams/{team_id}/team-sync/group-mappings", "GET /teams/{team_id}/teams", "GET /user/blocks", "GET /user/emails", "GET /user/followers", "GET /user/following", "GET /user/gpg_keys", "GET /user/installations", "GET /user/installations/{installation_id}/repositories", "GET /user/issues", "GET /user/keys", "GET /user/marketplace_purchases", "GET /user/marketplace_purchases/stubbed", "GET /user/memberships/orgs", "GET /user/migrations", "GET /user/migrations/{migration_id}/repositories", "GET /user/orgs", "GET /user/public_emails", "GET /user/repos", "GET /user/repository_invitations", "GET /user/starred", "GET /user/subscriptions", "GET /user/teams", "GET /users", "GET /users/{username}/events", "GET /users/{username}/events/orgs/{org}", "GET /users/{username}/events/public", "GET /users/{username}/followers", "GET /users/{username}/following", "GET /users/{username}/gists", "GET /users/{username}/gpg_keys", "GET /users/{username}/keys", "GET /users/{username}/orgs", "GET /users/{username}/projects", "GET /users/{username}/received_events", "GET /users/{username}/received_events/public", "GET /users/{username}/repos", "GET /users/{username}/starred", "GET /users/{username}/subscriptions"];
 
 function isPaginatingEndpoint(arg) {
   if (typeof arg === "string") {
@@ -3382,6 +3335,7 @@ const Endpoints = {
     }],
     compareCommits: ["GET /repos/{owner}/{repo}/compare/{base}...{head}"],
     compareCommitsWithBasehead: ["GET /repos/{owner}/{repo}/compare/{basehead}"],
+    createAutolink: ["POST /repos/{owner}/{repo}/autolinks"],
     createCommitComment: ["POST /repos/{owner}/{repo}/commits/{commit_sha}/comments"],
     createCommitSignatureProtection: ["POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures", {
       mediaType: {
@@ -3415,6 +3369,7 @@ const Endpoints = {
     deleteAccessRestrictions: ["DELETE /repos/{owner}/{repo}/branches/{branch}/protection/restrictions"],
     deleteAdminBranchProtection: ["DELETE /repos/{owner}/{repo}/branches/{branch}/protection/enforce_admins"],
     deleteAnEnvironment: ["DELETE /repos/{owner}/{repo}/environments/{environment_name}"],
+    deleteAutolink: ["DELETE /repos/{owner}/{repo}/autolinks/{autolink_id}"],
     deleteBranchProtection: ["DELETE /repos/{owner}/{repo}/branches/{branch}/protection"],
     deleteCommitComment: ["DELETE /repos/{owner}/{repo}/comments/{comment_id}"],
     deleteCommitSignatureProtection: ["DELETE /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures", {
@@ -3471,6 +3426,7 @@ const Endpoints = {
       }
     }],
     getAppsWithAccessToProtectedBranch: ["GET /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps"],
+    getAutolink: ["GET /repos/{owner}/{repo}/autolinks/{autolink_id}"],
     getBranch: ["GET /repos/{owner}/{repo}/branches/{branch}"],
     getBranchProtection: ["GET /repos/{owner}/{repo}/branches/{branch}/protection"],
     getClones: ["GET /repos/{owner}/{repo}/traffic/clones"],
@@ -3514,6 +3470,7 @@ const Endpoints = {
     getWebhook: ["GET /repos/{owner}/{repo}/hooks/{hook_id}"],
     getWebhookConfigForRepo: ["GET /repos/{owner}/{repo}/hooks/{hook_id}/config"],
     getWebhookDelivery: ["GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries/{delivery_id}"],
+    listAutolinks: ["GET /repos/{owner}/{repo}/autolinks"],
     listBranches: ["GET /repos/{owner}/{repo}/branches"],
     listBranchesForHeadCommit: ["GET /repos/{owner}/{repo}/commits/{commit_sha}/branches-where-head", {
       mediaType: {
@@ -3708,7 +3665,7 @@ const Endpoints = {
   }
 };
 
-const VERSION = "5.5.1";
+const VERSION = "5.7.0";
 
 function endpointsToMethods(octokit, endpointsMap) {
   const newMethods = {};
@@ -3907,7 +3864,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var endpoint = __nccwpck_require__(9440);
 var universalUserAgent = __nccwpck_require__(5030);
-var isPlainObject = __nccwpck_require__(9062);
+var isPlainObject = __nccwpck_require__(3287);
 var nodeFetch = _interopDefault(__nccwpck_require__(467));
 var requestError = __nccwpck_require__(537);
 
@@ -4080,232 +4037,52 @@ exports.request = request;
 
 /***/ }),
 
-/***/ 9062:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ 6507:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
 
 "use strict";
+// ESM COMPAT FLAG
+__nccwpck_require__.r(__webpack_exports__);
 
+// EXPORTS
+__nccwpck_require__.d(__webpack_exports__, {
+  "default": () => (/* binding */ slugify),
+  "slugifyWithCounter": () => (/* binding */ slugifyWithCounter)
+});
 
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-exports.isPlainObject = isPlainObject;
-
-
-/***/ }),
-
-/***/ 5268:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-const escapeStringRegexp = __nccwpck_require__(9727);
-const transliterate = __nccwpck_require__(8504);
-const builtinOverridableReplacements = __nccwpck_require__(5183);
-
-const decamelize = string => {
-	return string
-		// Separate capitalized words.
-		.replace(/([A-Z]{2,})([a-z\d]+)/g, '$1 $2')
-		.replace(/([a-z\d]+)([A-Z]{2,})/g, '$1 $2')
-
-		.replace(/([a-z\d])([A-Z])/g, '$1 $2')
-		.replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1 $2');
-};
-
-const removeMootSeparators = (string, separator) => {
-	const escapedSeparator = escapeStringRegexp(separator);
-
-	return string
-		.replace(new RegExp(`${escapedSeparator}{2,}`, 'g'), separator)
-		.replace(new RegExp(`^${escapedSeparator}|${escapedSeparator}$`, 'g'), '');
-};
-
-module.exports = (string, options) => {
-	if (typeof string !== 'string') {
-		throw new TypeError(`Expected a string, got \`${typeof string}\``);
-	}
-
-	options = {
-		separator: '-',
-		lowercase: true,
-		decamelize: true,
-		customReplacements: [],
-		preserveLeadingUnderscore: false,
-		...options
-	};
-
-	const shouldPrependUnderscore = options.preserveLeadingUnderscore && string.startsWith('_');
-
-	const customReplacements = new Map([
-		...builtinOverridableReplacements,
-		...options.customReplacements
-	]);
-
-	string = transliterate(string, {customReplacements});
-
-	if (options.decamelize) {
-		string = decamelize(string);
-	}
-
-	let patternSlug = /[^a-zA-Z\d]+/g;
-
-	if (options.lowercase) {
-		string = string.toLowerCase();
-		patternSlug = /[^a-z\d]+/g;
-	}
-
-	string = string.replace(patternSlug, options.separator);
-	string = string.replace(/\\/g, '');
-	string = removeMootSeparators(string, options.separator);
-
-	if (shouldPrependUnderscore) {
-		string = `_${string}`;
-	}
-
-	return string;
-};
-
-
-/***/ }),
-
-/***/ 9727:
-/***/ ((module) => {
-
-"use strict";
-
-
-const matchOperatorsRegex = /[|\\{}()[\]^$+*?.-]/g;
-
-module.exports = string => {
+;// CONCATENATED MODULE: ./node_modules/@sindresorhus/slugify/node_modules/escape-string-regexp/index.js
+function escapeStringRegexp(string) {
 	if (typeof string !== 'string') {
 		throw new TypeError('Expected a string');
 	}
 
-	return string.replace(matchOperatorsRegex, '\\$&');
-};
+	// Escape characters with special meaning either inside or outside character sets.
+	// Use a simple backslash escape when it’s always valid, and a `\xnn` escape when the simpler form would be disallowed by Unicode patterns’ stricter grammar.
+	return string
+		.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
+		.replace(/-/g, '\\x2d');
+}
 
-
-/***/ }),
-
-/***/ 5183:
-/***/ ((module) => {
-
-"use strict";
-
-
-module.exports = [
-	['&', ' and '],
-	['🦄', ' unicorn '],
-	['♥', ' love ']
-];
-
-
-/***/ }),
-
-/***/ 8504:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-const deburr = __nccwpck_require__(1601);
-const escapeStringRegexp = __nccwpck_require__(2319);
-const builtinReplacements = __nccwpck_require__(2749);
-
-const doCustomReplacements = (string, replacements) => {
-	for (const [key, value] of replacements) {
-		// TODO: Use `String#replaceAll()` when targeting Node.js 16.
-		string = string.replace(new RegExp(escapeStringRegexp(key), 'g'), value);
-	}
-
-	return string;
-};
-
-module.exports = (string, options) => {
-	if (typeof string !== 'string') {
-		throw new TypeError(`Expected a string, got \`${typeof string}\``);
-	}
-
-	options = {
-		customReplacements: [],
-		...options
-	};
-
-	const customReplacements = new Map([
-		...builtinReplacements,
-		...options.customReplacements
-	]);
-
-	string = string.normalize();
-	string = doCustomReplacements(string, customReplacements);
-	string = deburr(string);
-
-	return string;
-};
-
-
-/***/ }),
-
-/***/ 2319:
-/***/ ((module) => {
-
-"use strict";
-
-
-const matchOperatorsRegex = /[|\\{}()[\]^$+*?.-]/g;
-
-module.exports = string => {
+// EXTERNAL MODULE: ./node_modules/lodash.deburr/index.js
+var lodash_deburr = __nccwpck_require__(1601);
+;// CONCATENATED MODULE: ./node_modules/@sindresorhus/transliterate/node_modules/escape-string-regexp/index.js
+function escape_string_regexp_escapeStringRegexp(string) {
 	if (typeof string !== 'string') {
 		throw new TypeError('Expected a string');
 	}
 
-	return string.replace(matchOperatorsRegex, '\\$&');
-};
+	// Escape characters with special meaning either inside or outside character sets.
+	// Use a simple backslash escape when it’s always valid, and a `\xnn` escape when the simpler form would be disallowed by Unicode patterns’ stricter grammar.
+	return string
+		.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
+		.replace(/-/g, '\\x2d');
+}
 
-
-/***/ }),
-
-/***/ 2749:
-/***/ ((module) => {
-
-"use strict";
-
-
-module.exports = [
+;// CONCATENATED MODULE: ./node_modules/@sindresorhus/transliterate/replacements.js
+const replacements = [
 	// German umlauts
 	['ß', 'ss'],
+	['ẞ', 'Ss'],
 	['ä', 'ae'],
 	['Ä', 'Ae'],
 	['ö', 'oe'],
@@ -4625,16 +4402,26 @@ module.exports = [
 	['г', 'g'],
 	['Д', 'D'],
 	['д', 'd'],
+	['ъе', 'ye'],
+	['Ъе', 'Ye'],
+	['ъЕ', 'yE'],
+	['ЪЕ', 'YE'],
 	['Е', 'E'],
 	['е', 'e'],
+	['Ё', 'Yo'],
+	['ё', 'yo'],
 	['Ж', 'Zh'],
 	['ж', 'zh'],
 	['З', 'Z'],
 	['з', 'z'],
 	['И', 'I'],
 	['и', 'i'],
-	['Й', 'J'],
-	['й', 'j'],
+	['ый', 'iy'],
+	['Ый', 'Iy'],
+	['ЫЙ', 'IY'],
+	['ыЙ', 'iY'],
+	['Й', 'Y'],
+	['й', 'y'],
 	['К', 'K'],
 	['к', 'k'],
 	['Л', 'L'],
@@ -4657,16 +4444,16 @@ module.exports = [
 	['у', 'u'],
 	['Ф', 'F'],
 	['ф', 'f'],
-	['Х', 'H'],
-	['х', 'h'],
-	['Ц', 'Cz'],
-	['ц', 'cz'],
+	['Х', 'Kh'],
+	['х', 'kh'],
+	['Ц', 'Ts'],
+	['ц', 'ts'],
 	['Ч', 'Ch'],
 	['ч', 'ch'],
 	['Ш', 'Sh'],
 	['ш', 'sh'],
-	['Щ', 'Shh'],
-	['щ', 'shh'],
+	['Щ', 'Sch'],
+	['щ', 'sch'],
 	['Ъ', ''],
 	['ъ', ''],
 	['Ы', 'Y'],
@@ -4679,8 +4466,6 @@ module.exports = [
 	['ю', 'yu'],
 	['Я', 'Ya'],
 	['я', 'ya'],
-	['Ё', 'Yo'],
-	['ё', 'yo'],
 
 	// Romanian
 	['ă', 'a'],
@@ -4694,54 +4479,92 @@ module.exports = [
 
 	// Turkish
 	['ş', 's'],
-	['Ş', 's'],
+	['Ş', 'S'],
 	['ç', 'c'],
-	['Ç', 'c'],
+	['Ç', 'C'],
 	['ğ', 'g'],
-	['Ğ', 'g'],
+	['Ğ', 'G'],
 	['ı', 'i'],
-	['İ', 'i'],
+	['İ', 'I'],
 
 	// Armenian
 	['ա', 'a'],
+	['Ա', 'A'],
 	['բ', 'b'],
-	['գ', 'ɡ'],
+	['Բ', 'B'],
+	['գ', 'g'],
+	['Գ', 'G'],
 	['դ', 'd'],
+	['Դ', 'D'],
 	['ե', 'ye'],
+	['Ե', 'Ye'],
 	['զ', 'z'],
+	['Զ', 'Z'],
 	['է', 'e'],
-	['ը', 'u'],
+	['Է', 'E'],
+	['ը', 'y'],
+	['Ը', 'Y'],
 	['թ', 't'],
+	['Թ', 'T'],
 	['ժ', 'zh'],
+	['Ժ', 'Zh'],
 	['ի', 'i'],
+	['Ի', 'I'],
 	['լ', 'l'],
+	['Լ', 'L'],
 	['խ', 'kh'],
+	['Խ', 'Kh'],
 	['ծ', 'ts'],
+	['Ծ', 'Ts'],
 	['կ', 'k'],
+	['Կ', 'K'],
 	['հ', 'h'],
+	['Հ', 'H'],
 	['ձ', 'dz'],
-	['ղ', 'r'],
-	['ճ', 'j'],
+	['Ձ', 'Dz'],
+	['ղ', 'gh'],
+	['Ղ', 'Gh'],
+	['ճ', 'tch'],
+	['Ճ', 'Tch'],
 	['մ', 'm'],
-	['յ', 'j'],
+	['Մ', 'M'],
+	['յ', 'y'],
+	['Յ', 'Y'],
 	['ն', 'n'],
+	['Ն', 'N'],
 	['շ', 'sh'],
+	['Շ', 'Sh'],
 	['ո', 'vo'],
+	['Ո', 'Vo'],
 	['չ', 'ch'],
+	['Չ', 'Ch'],
 	['պ', 'p'],
+	['Պ', 'P'],
 	['ջ', 'j'],
+	['Ջ', 'J'],
 	['ռ', 'r'],
+	['Ռ', 'R'],
 	['ս', 's'],
+	['Ս', 'S'],
 	['վ', 'v'],
+	['Վ', 'V'],
 	['տ', 't'],
-	['ր', 're'],
-	['ց', 'ts'],
+	['Տ', 'T'],
+	['ր', 'r'],
+	['Ր', 'R'],
+	['ց', 'c'],
+	['Ց', 'C'],
 	['ու', 'u'],
-	['ւ', 'v'],
+	['ՈՒ', 'U'],
+	['Ու', 'U'],
 	['փ', 'p'],
+	['Փ', 'P'],
 	['ք', 'q'],
+	['Ք', 'Q'],
 	['օ', 'o'],
+	['Օ', 'O'],
 	['ֆ', 'f'],
+	['Ֆ', 'F'],
 	['և', 'yev'],
 
 	// Georgian
@@ -4945,7 +4768,7 @@ module.exports = [
 	['Ē', 'E'],
 	['Ģ', 'G'],
 	['Ī', 'I'],
-	['Ķ', 'k'],
+	['Ķ', 'K'],
 	['Ļ', 'L'],
 	['Ņ', 'N'],
 	['Ū', 'U'],
@@ -5050,8 +4873,1226 @@ module.exports = [
 	['є', 'ye'],
 	['і', 'i'],
 	['ї', 'yi'],
-	['ґ', 'g']
+	['ґ', 'g'],
+
+	// Dutch
+	['Ĳ', 'IJ'],
+	['ĳ', 'ij'],
+
+	// Danish
+	// ['Æ', 'Ae'],
+	// ['Ø', 'Oe'],
+	// ['Å', 'Aa'],
+	// ['æ', 'ae'],
+	// ['ø', 'oe'],
+	// ['å', 'aa']
+
+	// Currencies
+	['¢', 'c'],
+	['¥', 'Y'],
+	['߿', 'b'],
+	['৳', 't'],
+	['૱', 'Bo'],
+	['฿', 'B'],
+	['₠', 'CE'],
+	['₡', 'C'],
+	['₢', 'Cr'],
+	['₣', 'F'],
+	['₥', 'm'],
+	['₦', 'N'],
+	['₧', 'Pt'],
+	['₨', 'Rs'],
+	['₩', 'W'],
+	['₫', 's'],
+	['€', 'E'],
+	['₭', 'K'],
+	['₮', 'T'],
+	['₯', 'Dp'],
+	['₰', 'S'],
+	['₱', 'P'],
+	['₲', 'G'],
+	['₳', 'A'],
+	['₴', 'S'],
+	['₵', 'C'],
+	['₶', 'tt'],
+	['₷', 'S'],
+	['₸', 'T'],
+	['₹', 'R'],
+	['₺', 'L'],
+	['₽', 'P'],
+	['₿', 'B'],
+	['﹩', '$'],
+	['￠', 'c'],
+	['￥', 'Y'],
+	['￦', 'W'],
+
+	// Latin
+	['𝐀', 'A'],
+	['𝐁', 'B'],
+	['𝐂', 'C'],
+	['𝐃', 'D'],
+	['𝐄', 'E'],
+	['𝐅', 'F'],
+	['𝐆', 'G'],
+	['𝐇', 'H'],
+	['𝐈', 'I'],
+	['𝐉', 'J'],
+	['𝐊', 'K'],
+	['𝐋', 'L'],
+	['𝐌', 'M'],
+	['𝐍', 'N'],
+	['𝐎', 'O'],
+	['𝐏', 'P'],
+	['𝐐', 'Q'],
+	['𝐑', 'R'],
+	['𝐒', 'S'],
+	['𝐓', 'T'],
+	['𝐔', 'U'],
+	['𝐕', 'V'],
+	['𝐖', 'W'],
+	['𝐗', 'X'],
+	['𝐘', 'Y'],
+	['𝐙', 'Z'],
+	['𝐚', 'a'],
+	['𝐛', 'b'],
+	['𝐜', 'c'],
+	['𝐝', 'd'],
+	['𝐞', 'e'],
+	['𝐟', 'f'],
+	['𝐠', 'g'],
+	['𝐡', 'h'],
+	['𝐢', 'i'],
+	['𝐣', 'j'],
+	['𝐤', 'k'],
+	['𝐥', 'l'],
+	['𝐦', 'm'],
+	['𝐧', 'n'],
+	['𝐨', 'o'],
+	['𝐩', 'p'],
+	['𝐪', 'q'],
+	['𝐫', 'r'],
+	['𝐬', 's'],
+	['𝐭', 't'],
+	['𝐮', 'u'],
+	['𝐯', 'v'],
+	['𝐰', 'w'],
+	['𝐱', 'x'],
+	['𝐲', 'y'],
+	['𝐳', 'z'],
+	['𝐴', 'A'],
+	['𝐵', 'B'],
+	['𝐶', 'C'],
+	['𝐷', 'D'],
+	['𝐸', 'E'],
+	['𝐹', 'F'],
+	['𝐺', 'G'],
+	['𝐻', 'H'],
+	['𝐼', 'I'],
+	['𝐽', 'J'],
+	['𝐾', 'K'],
+	['𝐿', 'L'],
+	['𝑀', 'M'],
+	['𝑁', 'N'],
+	['𝑂', 'O'],
+	['𝑃', 'P'],
+	['𝑄', 'Q'],
+	['𝑅', 'R'],
+	['𝑆', 'S'],
+	['𝑇', 'T'],
+	['𝑈', 'U'],
+	['𝑉', 'V'],
+	['𝑊', 'W'],
+	['𝑋', 'X'],
+	['𝑌', 'Y'],
+	['𝑍', 'Z'],
+	['𝑎', 'a'],
+	['𝑏', 'b'],
+	['𝑐', 'c'],
+	['𝑑', 'd'],
+	['𝑒', 'e'],
+	['𝑓', 'f'],
+	['𝑔', 'g'],
+	['𝑖', 'i'],
+	['𝑗', 'j'],
+	['𝑘', 'k'],
+	['𝑙', 'l'],
+	['𝑚', 'm'],
+	['𝑛', 'n'],
+	['𝑜', 'o'],
+	['𝑝', 'p'],
+	['𝑞', 'q'],
+	['𝑟', 'r'],
+	['𝑠', 's'],
+	['𝑡', 't'],
+	['𝑢', 'u'],
+	['𝑣', 'v'],
+	['𝑤', 'w'],
+	['𝑥', 'x'],
+	['𝑦', 'y'],
+	['𝑧', 'z'],
+	['𝑨', 'A'],
+	['𝑩', 'B'],
+	['𝑪', 'C'],
+	['𝑫', 'D'],
+	['𝑬', 'E'],
+	['𝑭', 'F'],
+	['𝑮', 'G'],
+	['𝑯', 'H'],
+	['𝑰', 'I'],
+	['𝑱', 'J'],
+	['𝑲', 'K'],
+	['𝑳', 'L'],
+	['𝑴', 'M'],
+	['𝑵', 'N'],
+	['𝑶', 'O'],
+	['𝑷', 'P'],
+	['𝑸', 'Q'],
+	['𝑹', 'R'],
+	['𝑺', 'S'],
+	['𝑻', 'T'],
+	['𝑼', 'U'],
+	['𝑽', 'V'],
+	['𝑾', 'W'],
+	['𝑿', 'X'],
+	['𝒀', 'Y'],
+	['𝒁', 'Z'],
+	['𝒂', 'a'],
+	['𝒃', 'b'],
+	['𝒄', 'c'],
+	['𝒅', 'd'],
+	['𝒆', 'e'],
+	['𝒇', 'f'],
+	['𝒈', 'g'],
+	['𝒉', 'h'],
+	['𝒊', 'i'],
+	['𝒋', 'j'],
+	['𝒌', 'k'],
+	['𝒍', 'l'],
+	['𝒎', 'm'],
+	['𝒏', 'n'],
+	['𝒐', 'o'],
+	['𝒑', 'p'],
+	['𝒒', 'q'],
+	['𝒓', 'r'],
+	['𝒔', 's'],
+	['𝒕', 't'],
+	['𝒖', 'u'],
+	['𝒗', 'v'],
+	['𝒘', 'w'],
+	['𝒙', 'x'],
+	['𝒚', 'y'],
+	['𝒛', 'z'],
+	['𝒜', 'A'],
+	['𝒞', 'C'],
+	['𝒟', 'D'],
+	['𝒢', 'g'],
+	['𝒥', 'J'],
+	['𝒦', 'K'],
+	['𝒩', 'N'],
+	['𝒪', 'O'],
+	['𝒫', 'P'],
+	['𝒬', 'Q'],
+	['𝒮', 'S'],
+	['𝒯', 'T'],
+	['𝒰', 'U'],
+	['𝒱', 'V'],
+	['𝒲', 'W'],
+	['𝒳', 'X'],
+	['𝒴', 'Y'],
+	['𝒵', 'Z'],
+	['𝒶', 'a'],
+	['𝒷', 'b'],
+	['𝒸', 'c'],
+	['𝒹', 'd'],
+	['𝒻', 'f'],
+	['𝒽', 'h'],
+	['𝒾', 'i'],
+	['𝒿', 'j'],
+	['𝓀', 'h'],
+	['𝓁', 'l'],
+	['𝓂', 'm'],
+	['𝓃', 'n'],
+	['𝓅', 'p'],
+	['𝓆', 'q'],
+	['𝓇', 'r'],
+	['𝓈', 's'],
+	['𝓉', 't'],
+	['𝓊', 'u'],
+	['𝓋', 'v'],
+	['𝓌', 'w'],
+	['𝓍', 'x'],
+	['𝓎', 'y'],
+	['𝓏', 'z'],
+	['𝓐', 'A'],
+	['𝓑', 'B'],
+	['𝓒', 'C'],
+	['𝓓', 'D'],
+	['𝓔', 'E'],
+	['𝓕', 'F'],
+	['𝓖', 'G'],
+	['𝓗', 'H'],
+	['𝓘', 'I'],
+	['𝓙', 'J'],
+	['𝓚', 'K'],
+	['𝓛', 'L'],
+	['𝓜', 'M'],
+	['𝓝', 'N'],
+	['𝓞', 'O'],
+	['𝓟', 'P'],
+	['𝓠', 'Q'],
+	['𝓡', 'R'],
+	['𝓢', 'S'],
+	['𝓣', 'T'],
+	['𝓤', 'U'],
+	['𝓥', 'V'],
+	['𝓦', 'W'],
+	['𝓧', 'X'],
+	['𝓨', 'Y'],
+	['𝓩', 'Z'],
+	['𝓪', 'a'],
+	['𝓫', 'b'],
+	['𝓬', 'c'],
+	['𝓭', 'd'],
+	['𝓮', 'e'],
+	['𝓯', 'f'],
+	['𝓰', 'g'],
+	['𝓱', 'h'],
+	['𝓲', 'i'],
+	['𝓳', 'j'],
+	['𝓴', 'k'],
+	['𝓵', 'l'],
+	['𝓶', 'm'],
+	['𝓷', 'n'],
+	['𝓸', 'o'],
+	['𝓹', 'p'],
+	['𝓺', 'q'],
+	['𝓻', 'r'],
+	['𝓼', 's'],
+	['𝓽', 't'],
+	['𝓾', 'u'],
+	['𝓿', 'v'],
+	['𝔀', 'w'],
+	['𝔁', 'x'],
+	['𝔂', 'y'],
+	['𝔃', 'z'],
+	['𝔄', 'A'],
+	['𝔅', 'B'],
+	['𝔇', 'D'],
+	['𝔈', 'E'],
+	['𝔉', 'F'],
+	['𝔊', 'G'],
+	['𝔍', 'J'],
+	['𝔎', 'K'],
+	['𝔏', 'L'],
+	['𝔐', 'M'],
+	['𝔑', 'N'],
+	['𝔒', 'O'],
+	['𝔓', 'P'],
+	['𝔔', 'Q'],
+	['𝔖', 'S'],
+	['𝔗', 'T'],
+	['𝔘', 'U'],
+	['𝔙', 'V'],
+	['𝔚', 'W'],
+	['𝔛', 'X'],
+	['𝔜', 'Y'],
+	['𝔞', 'a'],
+	['𝔟', 'b'],
+	['𝔠', 'c'],
+	['𝔡', 'd'],
+	['𝔢', 'e'],
+	['𝔣', 'f'],
+	['𝔤', 'g'],
+	['𝔥', 'h'],
+	['𝔦', 'i'],
+	['𝔧', 'j'],
+	['𝔨', 'k'],
+	['𝔩', 'l'],
+	['𝔪', 'm'],
+	['𝔫', 'n'],
+	['𝔬', 'o'],
+	['𝔭', 'p'],
+	['𝔮', 'q'],
+	['𝔯', 'r'],
+	['𝔰', 's'],
+	['𝔱', 't'],
+	['𝔲', 'u'],
+	['𝔳', 'v'],
+	['𝔴', 'w'],
+	['𝔵', 'x'],
+	['𝔶', 'y'],
+	['𝔷', 'z'],
+	['𝔸', 'A'],
+	['𝔹', 'B'],
+	['𝔻', 'D'],
+	['𝔼', 'E'],
+	['𝔽', 'F'],
+	['𝔾', 'G'],
+	['𝕀', 'I'],
+	['𝕁', 'J'],
+	['𝕂', 'K'],
+	['𝕃', 'L'],
+	['𝕄', 'M'],
+	['𝕆', 'N'],
+	['𝕊', 'S'],
+	['𝕋', 'T'],
+	['𝕌', 'U'],
+	['𝕍', 'V'],
+	['𝕎', 'W'],
+	['𝕏', 'X'],
+	['𝕐', 'Y'],
+	['𝕒', 'a'],
+	['𝕓', 'b'],
+	['𝕔', 'c'],
+	['𝕕', 'd'],
+	['𝕖', 'e'],
+	['𝕗', 'f'],
+	['𝕘', 'g'],
+	['𝕙', 'h'],
+	['𝕚', 'i'],
+	['𝕛', 'j'],
+	['𝕜', 'k'],
+	['𝕝', 'l'],
+	['𝕞', 'm'],
+	['𝕟', 'n'],
+	['𝕠', 'o'],
+	['𝕡', 'p'],
+	['𝕢', 'q'],
+	['𝕣', 'r'],
+	['𝕤', 's'],
+	['𝕥', 't'],
+	['𝕦', 'u'],
+	['𝕧', 'v'],
+	['𝕨', 'w'],
+	['𝕩', 'x'],
+	['𝕪', 'y'],
+	['𝕫', 'z'],
+	['𝕬', 'A'],
+	['𝕭', 'B'],
+	['𝕮', 'C'],
+	['𝕯', 'D'],
+	['𝕰', 'E'],
+	['𝕱', 'F'],
+	['𝕲', 'G'],
+	['𝕳', 'H'],
+	['𝕴', 'I'],
+	['𝕵', 'J'],
+	['𝕶', 'K'],
+	['𝕷', 'L'],
+	['𝕸', 'M'],
+	['𝕹', 'N'],
+	['𝕺', 'O'],
+	['𝕻', 'P'],
+	['𝕼', 'Q'],
+	['𝕽', 'R'],
+	['𝕾', 'S'],
+	['𝕿', 'T'],
+	['𝖀', 'U'],
+	['𝖁', 'V'],
+	['𝖂', 'W'],
+	['𝖃', 'X'],
+	['𝖄', 'Y'],
+	['𝖅', 'Z'],
+	['𝖆', 'a'],
+	['𝖇', 'b'],
+	['𝖈', 'c'],
+	['𝖉', 'd'],
+	['𝖊', 'e'],
+	['𝖋', 'f'],
+	['𝖌', 'g'],
+	['𝖍', 'h'],
+	['𝖎', 'i'],
+	['𝖏', 'j'],
+	['𝖐', 'k'],
+	['𝖑', 'l'],
+	['𝖒', 'm'],
+	['𝖓', 'n'],
+	['𝖔', 'o'],
+	['𝖕', 'p'],
+	['𝖖', 'q'],
+	['𝖗', 'r'],
+	['𝖘', 's'],
+	['𝖙', 't'],
+	['𝖚', 'u'],
+	['𝖛', 'v'],
+	['𝖜', 'w'],
+	['𝖝', 'x'],
+	['𝖞', 'y'],
+	['𝖟', 'z'],
+	['𝖠', 'A'],
+	['𝖡', 'B'],
+	['𝖢', 'C'],
+	['𝖣', 'D'],
+	['𝖤', 'E'],
+	['𝖥', 'F'],
+	['𝖦', 'G'],
+	['𝖧', 'H'],
+	['𝖨', 'I'],
+	['𝖩', 'J'],
+	['𝖪', 'K'],
+	['𝖫', 'L'],
+	['𝖬', 'M'],
+	['𝖭', 'N'],
+	['𝖮', 'O'],
+	['𝖯', 'P'],
+	['𝖰', 'Q'],
+	['𝖱', 'R'],
+	['𝖲', 'S'],
+	['𝖳', 'T'],
+	['𝖴', 'U'],
+	['𝖵', 'V'],
+	['𝖶', 'W'],
+	['𝖷', 'X'],
+	['𝖸', 'Y'],
+	['𝖹', 'Z'],
+	['𝖺', 'a'],
+	['𝖻', 'b'],
+	['𝖼', 'c'],
+	['𝖽', 'd'],
+	['𝖾', 'e'],
+	['𝖿', 'f'],
+	['𝗀', 'g'],
+	['𝗁', 'h'],
+	['𝗂', 'i'],
+	['𝗃', 'j'],
+	['𝗄', 'k'],
+	['𝗅', 'l'],
+	['𝗆', 'm'],
+	['𝗇', 'n'],
+	['𝗈', 'o'],
+	['𝗉', 'p'],
+	['𝗊', 'q'],
+	['𝗋', 'r'],
+	['𝗌', 's'],
+	['𝗍', 't'],
+	['𝗎', 'u'],
+	['𝗏', 'v'],
+	['𝗐', 'w'],
+	['𝗑', 'x'],
+	['𝗒', 'y'],
+	['𝗓', 'z'],
+	['𝗔', 'A'],
+	['𝗕', 'B'],
+	['𝗖', 'C'],
+	['𝗗', 'D'],
+	['𝗘', 'E'],
+	['𝗙', 'F'],
+	['𝗚', 'G'],
+	['𝗛', 'H'],
+	['𝗜', 'I'],
+	['𝗝', 'J'],
+	['𝗞', 'K'],
+	['𝗟', 'L'],
+	['𝗠', 'M'],
+	['𝗡', 'N'],
+	['𝗢', 'O'],
+	['𝗣', 'P'],
+	['𝗤', 'Q'],
+	['𝗥', 'R'],
+	['𝗦', 'S'],
+	['𝗧', 'T'],
+	['𝗨', 'U'],
+	['𝗩', 'V'],
+	['𝗪', 'W'],
+	['𝗫', 'X'],
+	['𝗬', 'Y'],
+	['𝗭', 'Z'],
+	['𝗮', 'a'],
+	['𝗯', 'b'],
+	['𝗰', 'c'],
+	['𝗱', 'd'],
+	['𝗲', 'e'],
+	['𝗳', 'f'],
+	['𝗴', 'g'],
+	['𝗵', 'h'],
+	['𝗶', 'i'],
+	['𝗷', 'j'],
+	['𝗸', 'k'],
+	['𝗹', 'l'],
+	['𝗺', 'm'],
+	['𝗻', 'n'],
+	['𝗼', 'o'],
+	['𝗽', 'p'],
+	['𝗾', 'q'],
+	['𝗿', 'r'],
+	['𝘀', 's'],
+	['𝘁', 't'],
+	['𝘂', 'u'],
+	['𝘃', 'v'],
+	['𝘄', 'w'],
+	['𝘅', 'x'],
+	['𝘆', 'y'],
+	['𝘇', 'z'],
+	['𝘈', 'A'],
+	['𝘉', 'B'],
+	['𝘊', 'C'],
+	['𝘋', 'D'],
+	['𝘌', 'E'],
+	['𝘍', 'F'],
+	['𝘎', 'G'],
+	['𝘏', 'H'],
+	['𝘐', 'I'],
+	['𝘑', 'J'],
+	['𝘒', 'K'],
+	['𝘓', 'L'],
+	['𝘔', 'M'],
+	['𝘕', 'N'],
+	['𝘖', 'O'],
+	['𝘗', 'P'],
+	['𝘘', 'Q'],
+	['𝘙', 'R'],
+	['𝘚', 'S'],
+	['𝘛', 'T'],
+	['𝘜', 'U'],
+	['𝘝', 'V'],
+	['𝘞', 'W'],
+	['𝘟', 'X'],
+	['𝘠', 'Y'],
+	['𝘡', 'Z'],
+	['𝘢', 'a'],
+	['𝘣', 'b'],
+	['𝘤', 'c'],
+	['𝘥', 'd'],
+	['𝘦', 'e'],
+	['𝘧', 'f'],
+	['𝘨', 'g'],
+	['𝘩', 'h'],
+	['𝘪', 'i'],
+	['𝘫', 'j'],
+	['𝘬', 'k'],
+	['𝘭', 'l'],
+	['𝘮', 'm'],
+	['𝘯', 'n'],
+	['𝘰', 'o'],
+	['𝘱', 'p'],
+	['𝘲', 'q'],
+	['𝘳', 'r'],
+	['𝘴', 's'],
+	['𝘵', 't'],
+	['𝘶', 'u'],
+	['𝘷', 'v'],
+	['𝘸', 'w'],
+	['𝘹', 'x'],
+	['𝘺', 'y'],
+	['𝘻', 'z'],
+	['𝘼', 'A'],
+	['𝘽', 'B'],
+	['𝘾', 'C'],
+	['𝘿', 'D'],
+	['𝙀', 'E'],
+	['𝙁', 'F'],
+	['𝙂', 'G'],
+	['𝙃', 'H'],
+	['𝙄', 'I'],
+	['𝙅', 'J'],
+	['𝙆', 'K'],
+	['𝙇', 'L'],
+	['𝙈', 'M'],
+	['𝙉', 'N'],
+	['𝙊', 'O'],
+	['𝙋', 'P'],
+	['𝙌', 'Q'],
+	['𝙍', 'R'],
+	['𝙎', 'S'],
+	['𝙏', 'T'],
+	['𝙐', 'U'],
+	['𝙑', 'V'],
+	['𝙒', 'W'],
+	['𝙓', 'X'],
+	['𝙔', 'Y'],
+	['𝙕', 'Z'],
+	['𝙖', 'a'],
+	['𝙗', 'b'],
+	['𝙘', 'c'],
+	['𝙙', 'd'],
+	['𝙚', 'e'],
+	['𝙛', 'f'],
+	['𝙜', 'g'],
+	['𝙝', 'h'],
+	['𝙞', 'i'],
+	['𝙟', 'j'],
+	['𝙠', 'k'],
+	['𝙡', 'l'],
+	['𝙢', 'm'],
+	['𝙣', 'n'],
+	['𝙤', 'o'],
+	['𝙥', 'p'],
+	['𝙦', 'q'],
+	['𝙧', 'r'],
+	['𝙨', 's'],
+	['𝙩', 't'],
+	['𝙪', 'u'],
+	['𝙫', 'v'],
+	['𝙬', 'w'],
+	['𝙭', 'x'],
+	['𝙮', 'y'],
+	['𝙯', 'z'],
+	['𝙰', 'A'],
+	['𝙱', 'B'],
+	['𝙲', 'C'],
+	['𝙳', 'D'],
+	['𝙴', 'E'],
+	['𝙵', 'F'],
+	['𝙶', 'G'],
+	['𝙷', 'H'],
+	['𝙸', 'I'],
+	['𝙹', 'J'],
+	['𝙺', 'K'],
+	['𝙻', 'L'],
+	['𝙼', 'M'],
+	['𝙽', 'N'],
+	['𝙾', 'O'],
+	['𝙿', 'P'],
+	['𝚀', 'Q'],
+	['𝚁', 'R'],
+	['𝚂', 'S'],
+	['𝚃', 'T'],
+	['𝚄', 'U'],
+	['𝚅', 'V'],
+	['𝚆', 'W'],
+	['𝚇', 'X'],
+	['𝚈', 'Y'],
+	['𝚉', 'Z'],
+	['𝚊', 'a'],
+	['𝚋', 'b'],
+	['𝚌', 'c'],
+	['𝚍', 'd'],
+	['𝚎', 'e'],
+	['𝚏', 'f'],
+	['𝚐', 'g'],
+	['𝚑', 'h'],
+	['𝚒', 'i'],
+	['𝚓', 'j'],
+	['𝚔', 'k'],
+	['𝚕', 'l'],
+	['𝚖', 'm'],
+	['𝚗', 'n'],
+	['𝚘', 'o'],
+	['𝚙', 'p'],
+	['𝚚', 'q'],
+	['𝚛', 'r'],
+	['𝚜', 's'],
+	['𝚝', 't'],
+	['𝚞', 'u'],
+	['𝚟', 'v'],
+	['𝚠', 'w'],
+	['𝚡', 'x'],
+	['𝚢', 'y'],
+	['𝚣', 'z'],
+
+	// Dotless letters
+	['𝚤', 'l'],
+	['𝚥', 'j'],
+
+	// Greek
+	['𝛢', 'A'],
+	['𝛣', 'B'],
+	['𝛤', 'G'],
+	['𝛥', 'D'],
+	['𝛦', 'E'],
+	['𝛧', 'Z'],
+	['𝛨', 'I'],
+	['𝛩', 'TH'],
+	['𝛪', 'I'],
+	['𝛫', 'K'],
+	['𝛬', 'L'],
+	['𝛭', 'M'],
+	['𝛮', 'N'],
+	['𝛯', 'KS'],
+	['𝛰', 'O'],
+	['𝛱', 'P'],
+	['𝛲', 'R'],
+	['𝛳', 'TH'],
+	['𝛴', 'S'],
+	['𝛵', 'T'],
+	['𝛶', 'Y'],
+	['𝛷', 'F'],
+	['𝛸', 'x'],
+	['𝛹', 'PS'],
+	['𝛺', 'O'],
+	['𝛻', 'D'],
+	['𝛼', 'a'],
+	['𝛽', 'b'],
+	['𝛾', 'g'],
+	['𝛿', 'd'],
+	['𝜀', 'e'],
+	['𝜁', 'z'],
+	['𝜂', 'i'],
+	['𝜃', 'th'],
+	['𝜄', 'i'],
+	['𝜅', 'k'],
+	['𝜆', 'l'],
+	['𝜇', 'm'],
+	['𝜈', 'n'],
+	['𝜉', 'ks'],
+	['𝜊', 'o'],
+	['𝜋', 'p'],
+	['𝜌', 'r'],
+	['𝜍', 's'],
+	['𝜎', 's'],
+	['𝜏', 't'],
+	['𝜐', 'y'],
+	['𝜑', 'f'],
+	['𝜒', 'x'],
+	['𝜓', 'ps'],
+	['𝜔', 'o'],
+	['𝜕', 'd'],
+	['𝜖', 'E'],
+	['𝜗', 'TH'],
+	['𝜘', 'K'],
+	['𝜙', 'f'],
+	['𝜚', 'r'],
+	['𝜛', 'p'],
+	['𝜜', 'A'],
+	['𝜝', 'V'],
+	['𝜞', 'G'],
+	['𝜟', 'D'],
+	['𝜠', 'E'],
+	['𝜡', 'Z'],
+	['𝜢', 'I'],
+	['𝜣', 'TH'],
+	['𝜤', 'I'],
+	['𝜥', 'K'],
+	['𝜦', 'L'],
+	['𝜧', 'M'],
+	['𝜨', 'N'],
+	['𝜩', 'KS'],
+	['𝜪', 'O'],
+	['𝜫', 'P'],
+	['𝜬', 'S'],
+	['𝜭', 'TH'],
+	['𝜮', 'S'],
+	['𝜯', 'T'],
+	['𝜰', 'Y'],
+	['𝜱', 'F'],
+	['𝜲', 'X'],
+	['𝜳', 'PS'],
+	['𝜴', 'O'],
+	['𝜵', 'D'],
+	['𝜶', 'a'],
+	['𝜷', 'v'],
+	['𝜸', 'g'],
+	['𝜹', 'd'],
+	['𝜺', 'e'],
+	['𝜻', 'z'],
+	['𝜼', 'i'],
+	['𝜽', 'th'],
+	['𝜾', 'i'],
+	['𝜿', 'k'],
+	['𝝀', 'l'],
+	['𝝁', 'm'],
+	['𝝂', 'n'],
+	['𝝃', 'ks'],
+	['𝝄', 'o'],
+	['𝝅', 'p'],
+	['𝝆', 'r'],
+	['𝝇', 's'],
+	['𝝈', 's'],
+	['𝝉', 't'],
+	['𝝊', 'y'],
+	['𝝋', 'f'],
+	['𝝌', 'x'],
+	['𝝍', 'ps'],
+	['𝝎', 'o'],
+	['𝝏', 'a'],
+	['𝝐', 'e'],
+	['𝝑', 'i'],
+	['𝝒', 'k'],
+	['𝝓', 'f'],
+	['𝝔', 'r'],
+	['𝝕', 'p'],
+	['𝝖', 'A'],
+	['𝝗', 'B'],
+	['𝝘', 'G'],
+	['𝝙', 'D'],
+	['𝝚', 'E'],
+	['𝝛', 'Z'],
+	['𝝜', 'I'],
+	['𝝝', 'TH'],
+	['𝝞', 'I'],
+	['𝝟', 'K'],
+	['𝝠', 'L'],
+	['𝝡', 'M'],
+	['𝝢', 'N'],
+	['𝝣', 'KS'],
+	['𝝤', 'O'],
+	['𝝥', 'P'],
+	['𝝦', 'R'],
+	['𝝧', 'TH'],
+	['𝝨', 'S'],
+	['𝝩', 'T'],
+	['𝝪', 'Y'],
+	['𝝫', 'F'],
+	['𝝬', 'X'],
+	['𝝭', 'PS'],
+	['𝝮', 'O'],
+	['𝝯', 'D'],
+	['𝝰', 'a'],
+	['𝝱', 'v'],
+	['𝝲', 'g'],
+	['𝝳', 'd'],
+	['𝝴', 'e'],
+	['𝝵', 'z'],
+	['𝝶', 'i'],
+	['𝝷', 'th'],
+	['𝝸', 'i'],
+	['𝝹', 'k'],
+	['𝝺', 'l'],
+	['𝝻', 'm'],
+	['𝝼', 'n'],
+	['𝝽', 'ks'],
+	['𝝾', 'o'],
+	['𝝿', 'p'],
+	['𝞀', 'r'],
+	['𝞁', 's'],
+	['𝞂', 's'],
+	['𝞃', 't'],
+	['𝞄', 'y'],
+	['𝞅', 'f'],
+	['𝞆', 'x'],
+	['𝞇', 'ps'],
+	['𝞈', 'o'],
+	['𝞉', 'a'],
+	['𝞊', 'e'],
+	['𝞋', 'i'],
+	['𝞌', 'k'],
+	['𝞍', 'f'],
+	['𝞎', 'r'],
+	['𝞏', 'p'],
+	['𝞐', 'A'],
+	['𝞑', 'V'],
+	['𝞒', 'G'],
+	['𝞓', 'D'],
+	['𝞔', 'E'],
+	['𝞕', 'Z'],
+	['𝞖', 'I'],
+	['𝞗', 'TH'],
+	['𝞘', 'I'],
+	['𝞙', 'K'],
+	['𝞚', 'L'],
+	['𝞛', 'M'],
+	['𝞜', 'N'],
+	['𝞝', 'KS'],
+	['𝞞', 'O'],
+	['𝞟', 'P'],
+	['𝞠', 'S'],
+	['𝞡', 'TH'],
+	['𝞢', 'S'],
+	['𝞣', 'T'],
+	['𝞤', 'Y'],
+	['𝞥', 'F'],
+	['𝞦', 'X'],
+	['𝞧', 'PS'],
+	['𝞨', 'O'],
+	['𝞩', 'D'],
+	['𝞪', 'av'],
+	['𝞫', 'g'],
+	['𝞬', 'd'],
+	['𝞭', 'e'],
+	['𝞮', 'z'],
+	['𝞯', 'i'],
+	['𝞰', 'i'],
+	['𝞱', 'th'],
+	['𝞲', 'i'],
+	['𝞳', 'k'],
+	['𝞴', 'l'],
+	['𝞵', 'm'],
+	['𝞶', 'n'],
+	['𝞷', 'ks'],
+	['𝞸', 'o'],
+	['𝞹', 'p'],
+	['𝞺', 'r'],
+	['𝞻', 's'],
+	['𝞼', 's'],
+	['𝞽', 't'],
+	['𝞾', 'y'],
+	['𝞿', 'f'],
+	['𝟀', 'x'],
+	['𝟁', 'ps'],
+	['𝟂', 'o'],
+	['𝟃', 'a'],
+	['𝟄', 'e'],
+	['𝟅', 'i'],
+	['𝟆', 'k'],
+	['𝟇', 'f'],
+	['𝟈', 'r'],
+	['𝟉', 'p'],
+	['𝟊', 'F'],
+	['𝟋', 'f'],
+
+	// Numbers
+	['𝟎', '0'],
+	['𝟏', '1'],
+	['𝟐', '2'],
+	['𝟑', '3'],
+	['𝟒', '4'],
+	['𝟓', '5'],
+	['𝟔', '6'],
+	['𝟕', '7'],
+	['𝟖', '8'],
+	['𝟗', '9'],
+	['𝟘', '0'],
+	['𝟙', '1'],
+	['𝟚', '2'],
+	['𝟛', '3'],
+	['𝟜', '4'],
+	['𝟝', '5'],
+	['𝟞', '6'],
+	['𝟟', '7'],
+	['𝟠', '8'],
+	['𝟡', '9'],
+	['𝟢', '0'],
+	['𝟣', '1'],
+	['𝟤', '2'],
+	['𝟥', '3'],
+	['𝟦', '4'],
+	['𝟧', '5'],
+	['𝟨', '6'],
+	['𝟩', '7'],
+	['𝟪', '8'],
+	['𝟫', '9'],
+	['𝟬', '0'],
+	['𝟭', '1'],
+	['𝟮', '2'],
+	['𝟯', '3'],
+	['𝟰', '4'],
+	['𝟱', '5'],
+	['𝟲', '6'],
+	['𝟳', '7'],
+	['𝟴', '8'],
+	['𝟵', '9'],
+	['𝟶', '0'],
+	['𝟷', '1'],
+	['𝟸', '2'],
+	['𝟹', '3'],
+	['𝟺', '4'],
+	['𝟻', '5'],
+	['𝟼', '6'],
+	['𝟽', '7'],
+	['𝟾', '8'],
+	['𝟿', '9'],
+
+	// Punctuation
+	['🙰', '&'],
+	['🙱', '&'],
+	['🙲', '&'],
+	['🙳', '&'],
+	['🙴', '&'],
+	['🙵', '&'],
+	['🙶', '"'],
+	['🙷', '"'],
+	['🙸', '"'],
+	['‽', '?!'],
+	['🙹', '?!'],
+	['🙺', '?!'],
+	['🙻', '?!'],
+	['🙼', '/'],
+	['🙽', '\\'],
+
+	// Alchemy
+	['🜇', 'AR'],
+	['🜈', 'V'],
+	['🜉', 'V'],
+	['🜆', 'VR'],
+	['🜅', 'VF'],
+	['🜩', '2'],
+	['🜪', '5'],
+	['🝡', 'f'],
+	['🝢', 'W'],
+	['🝣', 'U'],
+	['🝧', 'V'],
+	['🝨', 'T'],
+	['🝪', 'V'],
+	['🝫', 'MB'],
+	['🝬', 'VB'],
+	['🝲', '3B'],
+	['🝳', '3B'],
+
+	// Emojis
+	['💯', '100'],
+	['🔙', 'BACK'],
+	['🔚', 'END'],
+	['🔛', 'ON!'],
+	['🔜', 'SOON'],
+	['🔝', 'TOP'],
+	['🔞', '18'],
+	['🔤', 'abc'],
+	['🔠', 'ABCD'],
+	['🔡', 'abcd'],
+	['🔢', '1234'],
+	['🔣', 'T&@%'],
+	['#️⃣', '#'],
+	['*️⃣', '*'],
+	['0️⃣', '0'],
+	['1️⃣', '1'],
+	['2️⃣', '2'],
+	['3️⃣', '3'],
+	['4️⃣', '4'],
+	['5️⃣', '5'],
+	['6️⃣', '6'],
+	['7️⃣', '7'],
+	['8️⃣', '8'],
+	['9️⃣', '9'],
+	['🔟', '10'],
+	['🅰️', 'A'],
+	['🅱️', 'B'],
+	['🆎', 'AB'],
+	['🆑', 'CL'],
+	['🅾️', 'O'],
+	['🆘', 'SOS']
 ];
+
+/* harmony default export */ const transliterate_replacements = (replacements);
+
+;// CONCATENATED MODULE: ./node_modules/@sindresorhus/transliterate/index.js
+
+
+
+
+const doCustomReplacements = (string, replacements) => {
+	for (const [key, value] of replacements) {
+		// TODO: Use `String#replaceAll()` when targeting Node.js 16.
+		string = string.replace(new RegExp(escape_string_regexp_escapeStringRegexp(key), 'g'), value);
+	}
+
+	return string;
+};
+
+function transliterate(string, options) {
+	if (typeof string !== 'string') {
+		throw new TypeError(`Expected a string, got \`${typeof string}\``);
+	}
+
+	options = {
+		customReplacements: [],
+		...options
+	};
+
+	const customReplacements = new Map([
+		...transliterate_replacements,
+		...options.customReplacements
+	]);
+
+	string = string.normalize();
+	string = doCustomReplacements(string, customReplacements);
+	string = lodash_deburr(string);
+
+	return string;
+}
+
+;// CONCATENATED MODULE: ./node_modules/@sindresorhus/slugify/overridable-replacements.js
+const overridableReplacements = [
+	['&', ' and '],
+	['🦄', ' unicorn '],
+	['♥', ' love ']
+];
+
+/* harmony default export */ const overridable_replacements = (overridableReplacements);
+
+;// CONCATENATED MODULE: ./node_modules/@sindresorhus/slugify/index.js
+
+
+
+
+const decamelize = string => {
+	return string
+		// Separate capitalized words.
+		.replace(/([A-Z]{2,})(\d+)/g, '$1 $2')
+		.replace(/([a-z\d]+)([A-Z]{2,})/g, '$1 $2')
+
+		.replace(/([a-z\d])([A-Z])/g, '$1 $2')
+		.replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1 $2');
+};
+
+const removeMootSeparators = (string, separator) => {
+	const escapedSeparator = escapeStringRegexp(separator);
+
+	return string
+		.replace(new RegExp(`${escapedSeparator}{2,}`, 'g'), separator)
+		.replace(new RegExp(`^${escapedSeparator}|${escapedSeparator}$`, 'g'), '');
+};
+
+function slugify(string, options) {
+	if (typeof string !== 'string') {
+		throw new TypeError(`Expected a string, got \`${typeof string}\``);
+	}
+
+	options = {
+		separator: '-',
+		lowercase: true,
+		decamelize: true,
+		customReplacements: [],
+		preserveLeadingUnderscore: false,
+		preserveTrailingDash: false,
+		...options
+	};
+
+	const shouldPrependUnderscore = options.preserveLeadingUnderscore && string.startsWith('_');
+	const shouldAppendDash = options.preserveTrailingDash && string.endsWith('-');
+
+	const customReplacements = new Map([
+		...overridable_replacements,
+		...options.customReplacements
+	]);
+
+	string = transliterate(string, {customReplacements});
+
+	if (options.decamelize) {
+		string = decamelize(string);
+	}
+
+	let patternSlug = /[^a-zA-Z\d]+/g;
+
+	if (options.lowercase) {
+		string = string.toLowerCase();
+		patternSlug = /[^a-z\d]+/g;
+	}
+
+	string = string.replace(patternSlug, options.separator);
+	string = string.replace(/\\/g, '');
+	if (options.separator) {
+		string = removeMootSeparators(string, options.separator);
+	}
+
+	if (shouldPrependUnderscore) {
+		string = `_${string}`;
+	}
+
+	if (shouldAppendDash) {
+		string = `${string}-`;
+	}
+
+	return string;
+}
+
+function slugifyWithCounter() {
+	const occurrences = new Map();
+
+	const countable = (string, options) => {
+		string = slugify(string, options);
+
+		if (!string) {
+			return '';
+		}
+
+		const stringLower = string.toLowerCase();
+		const numberless = occurrences.get(stringLower.replace(/(?:-\d+?)+?$/, '')) || 0;
+		const counter = occurrences.get(stringLower);
+		occurrences.set(stringLower, typeof counter === 'number' ? counter + 1 : 1);
+		const newCounter = occurrences.get(stringLower) || 2;
+		if (newCounter >= 2 || numberless > 2) {
+			string = `${string}-${newCounter}`;
+		}
+
+		return string;
+	};
+
+	countable.reset = () => {
+		occurrences.clear();
+	};
+
+	return countable;
+}
 
 
 /***/ }),
@@ -5257,6 +6298,52 @@ class Deprecation extends Error {
 }
 
 exports.Deprecation = Deprecation;
+
+
+/***/ }),
+
+/***/ 3287:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+/*!
+ * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+function isObject(o) {
+  return Object.prototype.toString.call(o) === '[object Object]';
+}
+
+function isPlainObject(o) {
+  var ctor,prot;
+
+  if (isObject(o) === false) return false;
+
+  // If has modified constructor
+  ctor = o.constructor;
+  if (ctor === undefined) return true;
+
+  // If has modified prototype
+  prot = ctor.prototype;
+  if (isObject(prot) === false) return false;
+
+  // If constructor does not have an Object-specific method
+  if (prot.hasOwnProperty('isPrototypeOf') === false) {
+    return false;
+  }
+
+  // Most likely a plain Object
+  return true;
+}
+
+exports.isPlainObject = isPlainObject;
 
 
 /***/ }),
@@ -11830,6 +12917,34 @@ module.exports = require("zlib");
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";

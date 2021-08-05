@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import github from '@actions/github'
+import {context, getOctokit} from '@actions/github'
 import {getTeamData} from './get-team-data'
 import {synchronizeTeamData} from './sync'
 import {TeamData} from './team-data'
@@ -10,8 +10,8 @@ async function run(): Promise<void> {
     const teamDataPath = core.getInput('team-data-path')
     const teamNamePrefix = core.getInput('prefix-teams-with')
 
-    const client = github.getOctokit(token).rest
-    const org = github.context.repo.owner
+    const client = getOctokit(token).rest
+    const org = context.repo.owner
 
     core.debug('Fetching authenticated user')
     const authenticatedUserResponse = await client.users.getAuthenticated()
