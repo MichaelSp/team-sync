@@ -3,15 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "description": "GitHub action to synchronize GitHub Teams with the contents of a teams document",
-  "main": "lib/main.js",
+  "main": "dist/main.js",
   "scripts": {
-    "build": "bun build --entrypoint src/main.ts --target node --outdir lib",
+    "build": "bun build --entrypoint src/main.ts --target node --outdir dist --sourcemap=external",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint src/**/*.ts",
-    "package": "ncc build --source-map --license licenses.txt",
     "test": "bun test",
-    "all": "bun run format && bun run lint && bun test && bun run build && bun run package"
+    "all": "bun run format && bun run lint && bun test && bun run build"
   },
   "repository": {
     "type": "git",

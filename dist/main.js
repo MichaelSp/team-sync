@@ -1,33 +1,4 @@
-require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
-/******/ 	"use strict";
-/******/ 	// The require scope
-/******/ 	var __nccwpck_require__ = {};
-/******/ 	
-/************************************************************************/
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__nccwpck_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/compat */
-/******/ 	
-/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
-/******/ 	
-/************************************************************************/
-var __webpack_exports__ = {};
-// ESM COMPAT FLAG
-__nccwpck_require__.r(__webpack_exports__);
-
-;// CONCATENATED MODULE: external "node:module"
-const external_node_module_namespaceObject = require("node:module");
-;// CONCATENATED MODULE: ./lib/main.js
-
+import {createRequire} from "node:module";
 var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getProtoOf = Object.getPrototypeOf;
@@ -45,7 +16,7 @@ var __toESM = (mod, isNodeMode, target) => {
   return to;
 };
 var __commonJS = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
-var __require = (0,external_node_module_namespaceObject.createRequire)(import.meta.url);
+var __require = createRequire(import.meta.url);
 
 // node_modules/@actions/core/lib/utils.js
 var require_utils = __commonJS((exports) => {
@@ -24111,7 +24082,7 @@ var bool = new type("tag:yaml.org,2002:bool", {
   },
   defaultStyle: "lowercase"
 });
-var main_int = new type("tag:yaml.org,2002:int", {
+var int = new type("tag:yaml.org,2002:int", {
   kind: "scalar",
   resolve: resolveYamlInteger,
   construct: constructYamlInteger,
@@ -24140,7 +24111,7 @@ var main_int = new type("tag:yaml.org,2002:int", {
 });
 var YAML_FLOAT_PATTERN = new RegExp("^(?:[-+]?(?:[0-9][0-9_]*)(?:\\.[0-9_]*)?(?:[eE][-+]?[0-9]+)?|\\.[0-9_]+(?:[eE][-+]?[0-9]+)?|[-+]?\\.(?:inf|Inf|INF)|\\.(?:nan|NaN|NAN))$");
 var SCIENTIFIC_WITHOUT_DOT = /^[-+]?[0-9]+e/;
-var main_float = new type("tag:yaml.org,2002:float", {
+var float = new type("tag:yaml.org,2002:float", {
   kind: "scalar",
   resolve: resolveYamlFloat,
   construct: constructYamlFloat,
@@ -24152,8 +24123,8 @@ var json = failsafe.extend({
   implicit: [
     _null,
     bool,
-    main_int,
-    main_float
+    int,
+    float
   ]
 });
 var core = json;
@@ -24368,14 +24339,14 @@ var dump = dumper.dump;
 var YAMLException = exception;
 var types = {
   binary,
-  float: main_float,
+  float,
   map,
   null: _null,
   pairs,
   set,
   timestamp,
   bool,
-  int: main_int,
+  int,
   merge,
   omap,
   seq,
@@ -26579,7 +26550,4 @@ async function run() {
 }
 run();
 
-module.exports = __webpack_exports__;
-/******/ })()
-;
-//# sourceMappingURL=index.js.map
+//# debugId=46879267D986C5C664756e2164756e21
