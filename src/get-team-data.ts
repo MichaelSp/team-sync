@@ -1,7 +1,7 @@
-import {RestEndpointMethods} from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types'
-import {TeamData} from './team-data'
 import {context} from '@actions/github'
+import {RestEndpointMethods} from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types'
 import yaml from 'js-yaml'
+import {TeamData} from './team-data'
 
 export async function getTeamData(
   client: RestEndpointMethods,
