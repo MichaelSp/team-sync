@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "description": "GitHub action to synchronize GitHub Teams with the contents of a teams document",
-  "main": "dist/main.js",
+  "main": "dist/main.mjs",
+  "types": "module",
   "scripts": {
-    "build": "bun build --entrypoint src/main.ts --target node --outdir dist --sourcemap=external",
+    "build": "bun build --entrypoint src/main.ts --target node --outdir dist --sourcemap=external && mv dist/main.js dist/main.mjs && mv dist/main.js.map dist/main.mjs.map",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint src/**/*.ts",
