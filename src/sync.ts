@@ -1,7 +1,7 @@
-import slugify from '@sindresorhus/slugify'
 import * as core from '@actions/core'
-import {TeamData} from './team-data'
 import {RestEndpointMethods} from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types'
+import slugify from '@sindresorhus/slugify'
+import {TeamData} from './team-data'
 
 export async function synchronizeTeamData(
   client: RestEndpointMethods,
@@ -12,7 +12,7 @@ export async function synchronizeTeamData(
 ): Promise<void> {
   for (const unprefixedTeamName of Object.keys(teams)) {
     const teamName = prefixName(unprefixedTeamName, teamNamePrefix)
-    const teamSlug = slugify(teamName, {decamelize: false})
+    const teamSlug = slugify(teamName, {decamelize: false, preserveCharacters: ['_']})
     const teamData = teams[unprefixedTeamName]
 
     if (teamData.team_sync_ignored) {
