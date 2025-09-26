@@ -31,3 +31,11 @@ jobs:
 
       - name: Build
         run: bun run build
+
+      - name: Fail if dist/** files changed
+        run: |
+          if [[ -n $(git status --porcelain dist/) ]]; then
+            echo "dist/** files have changed after build. Failing workflow."
+            exit 1
+          fi
+        
