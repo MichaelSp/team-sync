@@ -120,9 +120,7 @@ async function getExistingTeamAndMembers(
 
     const membersResponse = await client.teams.listMembersInOrg({org, team_slug: teamSlug})
 
-    existingMembers = membersResponse.data
-      .map(m => m?.login)
-      .filter(x => x !== undefined) as string[]
+    existingMembers = membersResponse.data.map(m => m?.login).filter(x => x !== undefined)
   } catch (error) {
     existingTeam = null
   }
