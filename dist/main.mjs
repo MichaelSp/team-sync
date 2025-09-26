@@ -26560,7 +26560,7 @@ async function getExistingTeamAndMembers(client, org, teamSlug) {
     existingTeam = teamResponse.data;
     const membersResponse = await client.teams.listMembersInOrg({ org, team_slug: teamSlug });
     existingMembers = membersResponse.data.map((m) => m?.login).filter((x) => x !== undefined);
-  } catch (error) {
+  } catch {
     existingTeam = null;
   }
   return { existingTeam, existingMembers };
@@ -26589,4 +26589,4 @@ async function run() {
 }
 run();
 
-//# debugId=C6C46A5BE78FFC7764756E2164756E21
+//# debugId=DB72C50A29B1AFE364756E2164756E21
