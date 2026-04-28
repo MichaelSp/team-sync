@@ -4,15 +4,29 @@ var __getProtoOf = Object.getPrototypeOf;
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+function __accessProp(key) {
+  return this[key];
+}
+var __toESMCache_node;
+var __toESMCache_esm;
 var __toESM = (mod, isNodeMode, target) => {
+  var canCache = mod != null && typeof mod === "object";
+  if (canCache) {
+    var cache = isNodeMode ? __toESMCache_node ??= new WeakMap : __toESMCache_esm ??= new WeakMap;
+    var cached = cache.get(mod);
+    if (cached)
+      return cached;
+  }
   target = mod != null ? __create(__getProtoOf(mod)) : {};
   const to = isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target;
   for (let key of __getOwnPropNames(mod))
     if (!__hasOwnProp.call(to, key))
       __defProp(to, key, {
-        get: () => mod[key],
+        get: __accessProp.bind(mod, key),
         enumerable: true
       });
+  if (canCache)
+    cache.set(mod, to);
   return to;
 };
 var __commonJS = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
@@ -3304,7 +3318,7 @@ var require_constants = __commonJS((exports, module) => {
     }
   })();
   var channel;
-  var structuredClone = globalThis.structuredClone ?? function structuredClone(value, options = undefined) {
+  var structuredClone = globalThis.structuredClone ?? function structuredClone2(value, options = undefined) {
     if (arguments.length === 0) {
       throw new TypeError("missing argument");
     }
@@ -19664,7 +19678,7 @@ var require_constants6 = __commonJS((exports, module) => {
     }
   })();
   var channel;
-  var structuredClone = globalThis.structuredClone ?? function structuredClone(value, options = undefined) {
+  var structuredClone = globalThis.structuredClone ?? function structuredClone2(value, options = undefined) {
     if (arguments.length === 0) {
       throw new TypeError("missing argument");
     }
@@ -42034,4 +42048,4 @@ async function run() {
 }
 run();
 
-//# debugId=4B891DBF4C483E3A64756E2164756E21
+//# debugId=6B1437938366A2DF64756E2164756E21

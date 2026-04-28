@@ -9,8 +9,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -32,10 +36,13 @@ jobs:
       - name: Build
         run: bun run build
 
-      - name: Fail if dist/** files changed
+      - name: Commit updated dist if changed
         run: |
           if [[ -n $(git status --porcelain dist/) ]]; then
-            echo "dist/** files have changed after build. Failing workflow."
-            exit 1
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add dist/
+            git commit -m "chore: update dist [skip ci]"
+            git push
           fi
         
