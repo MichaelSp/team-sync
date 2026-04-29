@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/MichaelSp/team-sync/compare/v0.8.0...v0.9.0) (2026-04-29)
+
+
+### Features
+
+* add release-please workflow for automated semver releases ([#36](https://github.com/MichaelSp/team-sync/issues/36)) ([1832d78](https://github.com/MichaelSp/team-sync/commit/1832d783856296b7ce4c67ed80aac948a7c43cc8))
+
 ## 0.5.0
 
 Support YAML teams configuration (in addition to JSON)
