@@ -106,10 +106,7 @@ async function getExistingTeamAndMembers(
   client: RestEndpointMethods,
   org: string,
   teamSlug: string
-): Promise<{
-  existingTeam: any | null
-  existingMembers: string[]
-}> {
+): Promise<{existingTeam: any | null; existingMembers: string[]}> {
   let existingTeam
   let existingMembers: string[] = []
 
@@ -120,10 +117,8 @@ async function getExistingTeamAndMembers(
 
     const membersResponse = await client.teams.listMembersInOrg({org, team_slug: teamSlug})
 
-    existingMembers = membersResponse.data
-      .map(m => m?.login)
-      .filter(x => x !== undefined) as string[]
-  } catch (error) {
+    existingMembers = membersResponse.data.map(m => m?.login).filter(x => x !== undefined)
+  } catch {
     existingTeam = null
   }
 
