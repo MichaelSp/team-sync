@@ -1,6 +1,6 @@
 import {context} from '@actions/github'
 import {RestEndpointMethods} from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types'
-import yaml from 'js-yaml'
+import {load} from 'js-yaml'
 import {TeamData} from './team-data'
 
 export async function getTeamData(
@@ -12,7 +12,7 @@ export async function getTeamData(
   if (teamDataPath.toLowerCase().endsWith('.json')) {
     return JSON.parse(teamDataContent)
   } else {
-    return (yaml.load(teamDataContent) || {}) as TeamData
+    return (load(teamDataContent) || {}) as TeamData
   }
 }
 
