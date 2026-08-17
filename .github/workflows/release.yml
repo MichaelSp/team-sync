@@ -19,6 +19,7 @@ jobs:
         id: release
         with:
           release-type: node
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout
         if: ${{ steps.release.outputs.release_created }}
@@ -38,7 +39,5 @@ jobs:
 
       - name: Upload dist to release
         if: ${{ steps.release.outputs.release_created }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload ${{ steps.release.outputs.tag_name }} dist/main.mjs dist/main.mjs.map
