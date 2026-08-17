@@ -17,9 +17,13 @@ jobs:
     steps:
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
         id: release
+        #  GitHub has an extra restriction: GITHUB_TOKEN cannot create a 
+        # release when the target commit modifies .github/workflows/*. 
+        # This is poorly surfaced in the release-please docs; GitHub 
+        # documents it under the Releases API. GitHub docs 
+        # (https://docs.github.com/en/rest/releases/releases#create-a-release)
         with:
           release-type: node
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout
         if: ${{ steps.release.outputs.release_created }}
