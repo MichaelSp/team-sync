@@ -37,7 +37,7 @@
     "@eslint/js": "10.0.1",
     "@types/bun": "1.4.0",
     "@types/js-yaml": "4.0.9",
-    "@types/node": "26.2.0",
+    "@types/node": "26.4.0",
     "@vercel/ncc": "0.45.0",
     "baseline-browser-mapping": "2.11.18",
     "eslint": "10.9.0",
